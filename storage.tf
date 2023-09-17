@@ -27,3 +27,19 @@ resource "aws_s3_bucket_public_access_block" "private" {
   ignore_public_acls = true
   restrict_public_buckets = true
 }
+
+# パブリックバケット
+resource "aws_s3_bucket" "public" {
+  # TODO: apply時は、別のバケット名にすること
+  bucket = "public-progmatic-terraform"
+  # ACLの設定で、インターネットからの読み込みを許可
+  acl = "public-read"
+
+# CORSの設定
+  cors_rule {
+    allowed_origins = ["https://example.com"]
+    allowed_methods = ["GET"]
+    allowed_headers = ["*"]
+    max_age_seconds = 3000
+  }
+}
