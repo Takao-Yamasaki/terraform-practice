@@ -43,3 +43,17 @@ resource "aws_s3_bucket" "public" {
     max_age_seconds = 3000
   }
 }
+
+# ログローテーションバケット
+resource "aws_s3_bucket" "alb_log" {
+  bucket = "alb-log-progmatic-terraform"
+
+  # ライフサイクルの設定
+  lifecycle_rule {
+    enabled = true
+
+    expiration {
+      days = "180"
+    }
+  }
+}
