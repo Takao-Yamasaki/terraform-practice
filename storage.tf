@@ -19,7 +19,7 @@ resource "aws_s3_bucket" "private" {
   }
 }
 
-# ブロックパブリックアクセスの定義
+# ブロックパブリックアクセスの定義（プライベートパケット）
 resource "aws_s3_bucket_public_access_block" "private" {
   bucket = aws_s3_bucket.private.id
   block_public_acls = true
@@ -32,9 +32,6 @@ resource "aws_s3_bucket_public_access_block" "private" {
 resource "aws_s3_bucket" "public" {
   # TODO: apply時は、別のバケット名にすること
   bucket = "public-progmatic-terraform-zakzak"
-  # ACLの設定で、インターネットからの読み込みを許可
-  # 明示的にプライベートで宣言
-  # acl = "private"
 
 # CORSの設定
   cors_rule {
@@ -43,6 +40,16 @@ resource "aws_s3_bucket" "public" {
     allowed_headers = ["*"]
     max_age_seconds = 3000
   }
+}
+
+# ブロックパブリックアクセスの定義(パブリックパケット)
+# ブロックパブリックアクセスの設定で、インターネットからの読み込みを許可
+resource "aws_s3_bucket_public_access_block" "public" {
+  bucket = aws_s3_bucket.public.id
+  block_public_acls = false
+  block_public_policy = false
+  ignore_public_acls = false
+  restrict_public_buckets = false
 }
 
 # ログローテーションバケット
