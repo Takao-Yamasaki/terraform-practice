@@ -2,16 +2,16 @@
 resource "aws_s3_bucket" "private" {
   # バケット名
   # TODO: apply時は、別のバケット名にすること
-  bucket = "private-pragmatic-terraform"
+  bucket = "private-pragmatic-terraform-zakzak"
 
-  # バージョニング
+  # バージョニングの設定
   versioning {
     enabled = true
   }
-
-  # 暗号化
+  
+  # サーバーサイド暗号化の設定
   server_side_encryption_configuration {
-    role {
+    rule {
       apply_server_side_encryption_by_default {
         sse_algorithm = "AES256"
       }
@@ -31,9 +31,10 @@ resource "aws_s3_bucket_public_access_block" "private" {
 # パブリックバケット
 resource "aws_s3_bucket" "public" {
   # TODO: apply時は、別のバケット名にすること
-  bucket = "public-progmatic-terraform"
+  bucket = "public-progmatic-terraform-zakzak"
   # ACLの設定で、インターネットからの読み込みを許可
-  acl = "public-read"
+  # 明示的にプライベートで宣言
+  # acl = "private"
 
 # CORSの設定
   cors_rule {
@@ -46,7 +47,8 @@ resource "aws_s3_bucket" "public" {
 
 # ログローテーションバケット
 resource "aws_s3_bucket" "alb_log" {
-  bucket = "alb-log-progmatic-terraform"
+  # TODO: apply時は、別のバケット名にすること
+  bucket = "alb-log-progmatic-terraform-zakzak"
 
   # ライフサイクルの設定
   lifecycle_rule {
@@ -54,6 +56,25 @@ resource "aws_s3_bucket" "alb_log" {
 
     expiration {
       days = "180"
+    }
+  }
+}
+
+# バケットポリシーの設定
+resource "aws_s3_bucket_policy" "alb_log" {
+  bucket = aws_s3_bucket.alb_log.id
+  policy = data.aws_iam_policy_document.alb_log.json
+}
+
+data "aws_iam_policy_document" "alb_log" {
+  statement {
+    effect = "Allow"
+    actions = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${aws_s3_bucket.alb_log.id}/*"]
+
+    principals{
+      type = "AWS"
+      identifiers = ["786832920677"]
     }
   }
 }

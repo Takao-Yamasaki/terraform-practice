@@ -6,7 +6,7 @@ variable "identifiers" {}
 
 # IAMロールの定義
 resource "aws_iam_role" "default" {
-  name = "example"
+  name = var.name
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 
@@ -30,8 +30,8 @@ resource "aws_iam_policy" "default" {
 
 # IAMポリシーのアタッチ
 resource "aws_iam_role_policy_attachment" "default" {
-  role = aws_iam_role.example.name
-  policy_arn = aws_iam_policy.example.arn
+  role = aws_iam_role.default.name
+  policy_arn = aws_iam_policy.default.arn
 }
 
 output "iam_role_arn" {
