@@ -42,3 +42,24 @@ resource "aws_route_table_association" "public" {
   subnet_id = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
 }
+
+# プライベートサブネットの定義
+resource "aws_subnet" "private" {
+  vpc_id = aws_vpc.example.id
+  cidr_block = "10.0.64.0/24"
+  availability_zone = "ap-northeast-1a"
+  # パブリックIPアドレスは不要
+  map_public_ip_on_launch = false
+}
+
+# ルートテーブルの定義
+# NOTE: プライベートなので、インターネットゲートウェイに対するルーティングは不要
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.example.id
+}
+
+# ルートテーブルの関連付け
+resource "aws_route_table_association" "private" {
+  subnet_id = aws_subnet.private.id
+  route_table_id = aws_route_table.private.id
+}
