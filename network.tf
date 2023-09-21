@@ -69,16 +69,13 @@ resource "aws_subnet" "private" {
   map_public_ip_on_launch = false
 }
 
-# ルートテーブルの定義
+# プライベートルートテーブルの定義
 # NOTE: プライベートなので、インターネットゲートウェイに対するルーティングは不要
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.example.id
-# NOTE: NATゲートウェイに対するルーティングを追加
-  nat_gateway_id = aws_nat_gateway.example.id
-  destination_cidr_block = "0.0.0.0/0"
 }
 
-# ルートテーブルの関連付け
+# プライベートルートテーブルの関連付け
 resource "aws_route_table_association" "private" {
   subnet_id = aws_subnet.private.id
   route_table_id = aws_route_table.private.id
@@ -91,8 +88,16 @@ resource "aws_eip" "nat_gateway" {
 }
 
 # NATゲートウェイの定義
+# TODO: NATゲートウェイの冗長化
 resource "aws_nat_gateway" "example" {
   allocation_id = aws_eip.nat_gateway.id
   subnet_id = aws_subnet.public.id
   depends_on = [ aws_internet_gateway.example ]
+}
+
+# プライベートのルートの定義
+resource "aws_route" "private" {
+  route_table_id = aws_route_table.public.id
+  nat_gateway_id = aws_nat_gateway.example.id
+  destination_cidr_block = "0.0.0.0/0"
 }
