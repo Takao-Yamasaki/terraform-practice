@@ -134,3 +134,32 @@ resource "aws_nat_gateway" "nat_gateway_1" {
   subnet_id = aws_subnet.private_1.id
   depends_on = [ aws_internet_gateway.example ]
 }
+
+# セキュリティグループの定義
+resource "aws_security_group" "example" {
+  name = "example"
+  vpc_id = aws_vpc.example.id
+}
+
+# セキュリティグループのルール（インバウンド）
+# HTTP通信ができるように80番ポートを許可
+resource "aws_security_group_rule" "ingress_example" {
+  type = "ingress"
+  from_port = "80"
+  to_port = "80"
+  protocol = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.example.id
+}
+
+# セキュリティグループのルール（アウトバウンド）
+resource "aws_security_group_rule" "egress_example" {
+  type = "egress"
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  cidr_blocks = [ "0.0.0.0/0" ]
+  security_group_id = aws_security_group.example.id
+}
+
+# TODO セキュリティグループのモジュール化
